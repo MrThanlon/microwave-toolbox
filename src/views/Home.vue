@@ -3,6 +3,7 @@
     <main style="width: 100%;display: flex;flex-wrap: wrap">
       <div style="width: 50%">
         <smith style="border: black 1px solid" :r="zr" :x="zx"
+               @v-mousemove="smithCursorCallback"
                :key="enableAdmittanceAxis+enableResistanceAxis"
                :enable-resistance-axis="enableResistanceAxis"
                :enable-admittance-axis="enableAdmittanceAxis"></smith>
@@ -11,12 +12,26 @@
         <div style="width: 100%">
           <h4>坐标系</h4>
           <label>
-            实轴
             <input type="checkbox" v-model="enableResistanceAxis">
+            实轴
           </label>
           <label>
-            虚轴
             <input type="checkbox" v-model="enableAdmittanceAxis">
+            虚轴
+          </label>
+          <label>
+            <input type="checkbox" checked>
+            阻抗
+            <span v-if="smithCursor!==null">
+              &nbsp;Z={{renderComplex(smithCursor.Z[0].toFixed(3), smithCursor.Z[1].toFixed(3))}}
+            </span>
+          </label>
+          <label>
+            <input type="checkbox" checked>
+            导纳
+            <span v-if="smithCursor!==null">
+              &nbsp;G={{renderComplex(smithCursor.G[0], smithCursor.G[1])}}
+            </span>
           </label>
         </div>
         <div style="width: 100%">
@@ -92,8 +107,39 @@
         <div style="width: 100%">
           <h4>PI型网络匹配</h4>
         </div>
-        <div style="width: 100%">
-          <h4>单枝节网络匹配</h4>
+        <div class="row d-flex flex-wrap">
+          <h4 class="row">单枝节网络匹配</h4>
+          <div class="row d-flex flex-nowrap" v-if="oneStubParallelAnswer!==null">
+            <div class="half-width d-flex flex-wrap border justify-content-center">
+              <p class="row d-flex justify-content-center border">并联</p>
+              <div class="row d-flex flex-nowrap">
+                <div class="half-width d-flex flex-wrap justify-content-center border">
+                  <p class="row d-flex justify-content-center">端接开路</p>
+                  <div>
+                    d1={{oneStubParallelAnswer.d1.toFixed(3)}}&lambda;
+                    d2={{oneStubParallelAnswer.d2.toFixed(3)}}&lambda;
+                    L1={{oneStubParallelAnswer.open.l1.toFixed(3)}}&lambda;
+                    L2={{oneStubParallelAnswer.open.l2.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+                <div class="half-width d-flex flex-wrap justify-content-center border">
+                  <p class="row d-flex justify-content-center">端接短路</p>
+                  <div>
+                    d1={{oneStubParallelAnswer.d1.toFixed(3)}}&lambda;
+                    d2={{oneStubParallelAnswer.d2.toFixed(3)}}&lambda;
+                    L1={{oneStubParallelAnswer.short.l1.toFixed(3)}}&lambda;
+                    L2={{oneStubParallelAnswer.short.l2.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="half-width border justify-content-center">
+              <p class="row d-flex justify-content-center border">串联</p>
+            </div>
+          </div>
+          <div v-else>
+            不适用
+          </div>
         </div>
         <div style="width: 100%">
           <h4>双枝节网络匹配</h4>
@@ -124,8 +170,10 @@ export default {
         LCHighPass: null,
         CLHighPass: null
       },
+      oneStubParallelAnswer: null,
       enableResistanceAxis: true,
-      enableAdmittanceAxis: false
+      enableAdmittanceAxis: false,
+      smithCursor: null
     }
   },
   computed: {
@@ -155,11 +203,29 @@ export default {
     smith
   },
   methods: {
+    callback (e) {
+      console.debug(e)
+    },
+    renderComplex (r, x) {
+      return `${r}${x >= 0 ? '+' : ''}${x}j`
+    },
+    smithCursorCallback ({ x, y }) {
+      if (x === null) {
+        // move out
+        this.smithCursor = null
+        return
+      }
+      this.smithCursor = {
+        Z: [(1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y), 2 * y / ((1 - x) * (1 - x) + y * y)],
+        G: [1, 0]
+      }
+    },
     drawLNetPath () {
       console.debug(this.LNetSelect)
     },
     doMatch () {
       this.LNetText = this.LNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency)
+      this.oneStubParallelAnswer = this.oneStubParallel(this.Rl, this.Xl, this.Rs)
     },
     LCLP (Rs, Xs, Rl, Xl, f) {
       return this.CLLP(Rl, Xl, Rs, Xs, f)
@@ -227,11 +293,61 @@ export default {
         LCHighPass: this.LCHP(Rs, Xs, Rl, Xl, f),
         CLHighPass: this.CLHP(Rs, Xs, Rl, Xl, f)
       }
+    },
+    oneStubParallel (Rl, Xl, Rs) {
+      let t1
+      let t2
+      if (Rl === Rs) {
+        t1 = t2 = -Xl / Rl
+      } else {
+        t1 = (Xl + Math.sqrt(Rl * ((Rs - Rl) * (Rs - Rl) + Xl * Xl) / Rs)) / (Rl - Rs)
+        t2 = (Xl - Math.sqrt(Rl * ((Rs - Rl) * (Rs - Rl) + Xl * Xl) / Rs)) / (Rl - Rs)
+      }
+      const B1 = (Rl * Rl * t1 - (Rs - Xl * t1) * (Xl + Rs * t1)) / (Rs * (Rl * Rl + (Xl + Rs * t1) * (Xl + Rs * t1)))
+      const B2 = (Rl * Rl * t2 - (Rs - Xl * t2) * (Xl + Rs * t2)) / (Rs * (Rl * Rl + (Xl + Rs * t2) * (Xl + Rs * t2)))
+      const Ys = 1 / Rs
+      const lo1 = -Math.atan(B1 / Ys) / (2 * Math.PI)
+      const lo2 = -Math.atan(B2 / Ys) / (2 * Math.PI)
+      const ls1 = Math.atan(Ys / B1) / (2 * Math.PI)
+      const ls2 = Math.atan(Ys / B2) / (2 * Math.PI)
+      return {
+        d1: (t1 >= 0 ? Math.atan(t1) : (Math.PI + Math.atan(t1))) / (2 * Math.PI),
+        d2: (t2 >= 0 ? Math.atan(t2) : (Math.PI + Math.atan(t2))) / (2 * Math.PI),
+        open: {
+          l1: lo1 >= 0 ? lo1 : lo1 + 0.5,
+          l2: lo2 >= 0 ? lo2 : lo2 + 0.5
+        },
+        short: {
+          l1: ls1 >= 0 ? ls1 : ls1 + 0.5,
+          l2: ls2 >= 0 ? ls2 : ls2 + 0.5
+        }
+      }
     }
   }
 }
 </script>
 <style scoped>
+  .row {
+    width: 100%;
+  }
+  .half-width {
+    width: 50%;
+  }
+  .d-flex {
+    display: flex;
+  }
+  .flex-wrap {
+    flex-wrap: wrap;
+  }
+  .flex-nowrap {
+    flex-wrap: nowrap;
+  }
+  .border {
+    border: black 1px solid;
+  }
+  .justify-content-center {
+    justify-content: center;
+  }
   p {
     margin: 0;
   }

@@ -2,6 +2,7 @@
   <svg :width="length" :height="length" ref="svg" id="svg"
        @click="clickCallback"
        @mousemove="moveCallback"
+       @mouseout="$emit('v-mousemove', {x:null,y:null})"
        @mousedown="mousedown=true"
        @mouseup="mousedown=false">
   </svg>
@@ -117,16 +118,16 @@ export default {
       this.drawImageCircle(xl)
     },
     moveCallback (e) {
-      if (!this.mousedown || e.target !== this.$refs.svg) {
+      if (e.target !== this.$refs.svg) {
         return
       }
       const x = e.offsetX / this.lengthUnit - 1
       const y = 1 - e.offsetY / this.lengthUnit
-      const rl = (1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y)
-      const xl = 2 * y / ((1 - x) * (1 - x) + y * y)
-      this.drawRealCircle(rl)
-      this.drawImageCircle(xl)
-      console.debug(e.offsetX, e.offsetY, x, y, rl, xl)
+      // const rl = (1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y)
+      // const xl = 2 * y / ((1 - x) * (1 - x) + y * y)
+      this.$emit('v-mousemove', { x, y })
+      // this.drawRealCircle(rl)
+      // this.drawImageCircle(xl)
     },
     createRealCircle (rl, stroke = 'black') {
       const radius = 1 / (1 + rl)
