@@ -109,10 +109,10 @@
         </div>
         <div class="row d-flex flex-wrap">
           <h4 class="row">单枝节网络匹配</h4>
-          <div class="row d-flex flex-nowrap" v-if="oneStubParallelAnswer!==null">
-            <div class="half-width d-flex flex-wrap border justify-content-center">
+          <div class="row d-flex flex-nowrap">
+            <div class="half-width d-flex flex-wrap border justify-content-center align-content-start">
               <p class="row d-flex justify-content-center border">并联</p>
-              <div class="row d-flex flex-nowrap">
+              <div class="row d-flex flex-nowrap" v-if="oneStubParallelAnswer!==null">
                 <div class="half-width d-flex flex-wrap justify-content-center border">
                   <p class="row d-flex justify-content-center">端接开路</p>
                   <div>
@@ -132,13 +132,36 @@
                   </div>
                 </div>
               </div>
+              <div v-else>
+                不适用
+              </div>
             </div>
-            <div class="half-width border justify-content-center">
+            <div class="half-width d-flex flex-wrap border justify-content-center align-content-start">
               <p class="row d-flex justify-content-center border">串联</p>
+              <div class="row d-flex flex-nowrap" v-if="oneStubSerialAnswer!==null">
+                <div class="half-width d-flex flex-wrap justify-content-center border">
+                  <p class="row d-flex justify-content-center">端接开路</p>
+                  <div>
+                    d1={{oneStubSerialAnswer.d1.toFixed(3)}}&lambda;
+                    d2={{oneStubSerialAnswer.d2.toFixed(3)}}&lambda;
+                    L1={{oneStubSerialAnswer.open.l1.toFixed(3)}}&lambda;
+                    L2={{oneStubSerialAnswer.open.l2.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+                <div class="half-width d-flex flex-wrap justify-content-center border">
+                  <p class="row d-flex justify-content-center">端接短路</p>
+                  <div>
+                    d1={{oneStubSerialAnswer.d1.toFixed(3)}}&lambda;
+                    d2={{oneStubSerialAnswer.d2.toFixed(3)}}&lambda;
+                    L1={{oneStubSerialAnswer.short.l1.toFixed(3)}}&lambda;
+                    L2={{oneStubSerialAnswer.short.l2.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+              </div>
+              <div v-else>
+                不适用
+              </div>
             </div>
-          </div>
-          <div v-else>
-            不适用
           </div>
         </div>
         <div style="width: 100%">
@@ -171,6 +194,7 @@ export default {
         CLHighPass: null
       },
       oneStubParallelAnswer: null,
+      oneStubSerialAnswer: null,
       enableResistanceAxis: true,
       enableAdmittanceAxis: false,
       smithCursor: null
@@ -225,7 +249,8 @@ export default {
     },
     doMatch () {
       this.LNetText = this.LNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency)
-      this.oneStubParallelAnswer = this.oneStubParallel(this.Rl, this.Xl, this.Rs)
+      this.oneStubParallelAnswer = this.oneStubParallel(this.Rl, this.Xl, this.Rs, this.Xs)
+      this.oneStubSerialAnswer = this.oneStubSerial(this.Rl, this.Xl, this.Rs, this.Xs)
     },
     LCLP (Rs, Xs, Rl, Xl, f) {
       return this.CLLP(Rl, Xl, Rs, Xs, f)
@@ -294,17 +319,20 @@ export default {
         CLHighPass: this.CLHP(Rs, Xs, Rl, Xl, f)
       }
     },
-    oneStubParallel (Rl, Xl, Rs) {
+    oneStubParallel (Rl, Xl, Rs, Xs) {
+      if (Xs !== 0) {
+        return null
+      }
       let t1
       let t2
       if (Rl === Rs) {
         t1 = t2 = -Xl / Rl
       } else {
-        t1 = (Xl + Math.sqrt(Rl * ((Rs - Rl) * (Rs - Rl) + Xl * Xl) / Rs)) / (Rl - Rs)
-        t2 = (Xl - Math.sqrt(Rl * ((Rs - Rl) * (Rs - Rl) + Xl * Xl) / Rs)) / (Rl - Rs)
+        t1 = (Xl + Math.sqrt(Rl * ((Rs - Rl) ** 2 + Xl ** 2) / Rs)) / (Rl - Rs)
+        t2 = (Xl - Math.sqrt(Rl * ((Rs - Rl) ** 2 + Xl ** 2) / Rs)) / (Rl - Rs)
       }
-      const B1 = (Rl * Rl * t1 - (Rs - Xl * t1) * (Xl + Rs * t1)) / (Rs * (Rl * Rl + (Xl + Rs * t1) * (Xl + Rs * t1)))
-      const B2 = (Rl * Rl * t2 - (Rs - Xl * t2) * (Xl + Rs * t2)) / (Rs * (Rl * Rl + (Xl + Rs * t2) * (Xl + Rs * t2)))
+      const B1 = (Rl ** 2 * t1 - (Rs - Xl * t1) * (Xl + Rs * t1)) / (Rs * (Rl ** 2 + (Xl + Rs * t1) ** 2))
+      const B2 = (Rl ** 2 * t2 - (Rs - Xl * t2) * (Xl + Rs * t2)) / (Rs * (Rl ** 2 + (Xl + Rs * t2) ** 2))
       const Ys = 1 / Rs
       const lo1 = -Math.atan(B1 / Ys) / (2 * Math.PI)
       const lo2 = -Math.atan(B2 / Ys) / (2 * Math.PI)
@@ -313,6 +341,41 @@ export default {
       return {
         d1: (t1 >= 0 ? Math.atan(t1) : (Math.PI + Math.atan(t1))) / (2 * Math.PI),
         d2: (t2 >= 0 ? Math.atan(t2) : (Math.PI + Math.atan(t2))) / (2 * Math.PI),
+        open: {
+          l1: lo1 >= 0 ? lo1 : lo1 + 0.5,
+          l2: lo2 >= 0 ? lo2 : lo2 + 0.5
+        },
+        short: {
+          l1: ls1 >= 0 ? ls1 : ls1 + 0.5,
+          l2: ls2 >= 0 ? ls2 : ls2 + 0.5
+        }
+      }
+    },
+    oneStubSerial (Rl, Xl, Rs, Xs) {
+      if (Xs !== 0) {
+        return null
+      }
+      // transmit to admittance
+      const Gl = Rl / (Rl ** 2 + Xl ** 2)
+      const Bl = -Xl / (Rl ** 2 + Xl ** 2)
+      const Y0 = 1 / Rs
+      let t1
+      let t2
+      if (Gl === Y0) {
+        t1 = t2 = -Bl / (2 * Y0)
+      } else {
+        t1 = (Bl + Math.sqrt(Gl * ((Y0 - Gl) ** 2 + Bl ** 2) / Y0)) / (Gl - Y0)
+        t2 = (Bl - Math.sqrt(Gl * ((Y0 - Gl) ** 2 + Bl ** 2) / Y0)) / (Gl - Y0)
+      }
+      const X1 = (Gl ** 2 * t1 - (Y0 - t1 * Bl) * (Bl + t1 * Y0)) / (Y0 * (Gl ** 2 + (Bl + Y0 * t1) ** 2))
+      const X2 = (Gl ** 2 * t2 - (Y0 - t2 * Bl) * (Bl + t2 * Y0)) / (Y0 * (Gl ** 2 + (Bl + Y0 * t2) ** 2))
+      const lo1 = Math.atan(Rs / X1) / (2 * Math.PI)
+      const lo2 = Math.atan(Rs / X2) / (2 * Math.PI)
+      const ls1 = -Math.atan(X1 / Rs) / (2 * Math.PI)
+      const ls2 = -Math.atan(X2 / Rs) / (2 * Math.PI)
+      return {
+        d1: (t1 >= 0 ? Math.atan(t1) : Math.atan(t1) + Math.PI) / (2 * Math.PI),
+        d2: (t2 >= 0 ? Math.atan(t2) : Math.atan(t2) + Math.PI) / (2 * Math.PI),
         open: {
           l1: lo1 >= 0 ? lo1 : lo1 + 0.5,
           l2: lo2 >= 0 ? lo2 : lo2 + 0.5
@@ -347,6 +410,9 @@ export default {
   }
   .justify-content-center {
     justify-content: center;
+  }
+  .align-content-start {
+    align-content: start;
   }
   p {
     margin: 0;
