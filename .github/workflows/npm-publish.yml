@@ -27,12 +27,13 @@ jobs:
     # Run build
     - name: Build
       run: npm run build
-        
+
     # Deploy
     - name: Deploy to GitHub Pages
       uses: crazy-max/ghaction-github-pages@v2.0.1
       with:
         target_branch: pages
         build_dir: dist
+        fqdn: microwave.ch34k.xyz
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
