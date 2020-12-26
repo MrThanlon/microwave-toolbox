@@ -30,7 +30,7 @@
             <input type="checkbox" checked>
             导纳
             <span v-if="smithCursor!==null">
-              &nbsp;G={{renderComplex(smithCursor.G[0], smithCursor.G[1])}}
+              &nbsp;G={{renderComplex(smithCursor.G[0].toFixed(3), smithCursor.G[1].toFixed(3))}}
             </span>
           </label>
         </div>
@@ -112,23 +112,31 @@
           <div class="row d-flex flex-nowrap">
             <div class="half-width d-flex flex-wrap border justify-content-center align-content-start">
               <p class="row d-flex justify-content-center border">并联</p>
-              <div class="row d-flex flex-nowrap" v-if="oneStubParallelAnswer!==null">
+              <div class="row d-flex flex-nowrap" v-if="singleStubParallelAnswer!==null">
                 <div class="half-width d-flex flex-wrap justify-content-center border">
-                  <p class="row d-flex justify-content-center">端接开路</p>
-                  <div>
-                    d1={{oneStubParallelAnswer.d1.toFixed(3)}}&lambda;
-                    d2={{oneStubParallelAnswer.d2.toFixed(3)}}&lambda;
-                    L1={{oneStubParallelAnswer.open.l1.toFixed(3)}}&lambda;
-                    L2={{oneStubParallelAnswer.open.l2.toFixed(3)}}&lambda;
+                  <p class="row d-flex justify-content-center border">端接开路</p>
+                  <div class="d-flex flex-nowrap row">
+                    <div class="half-width border">
+                      d={{singleStubParallelAnswer.d1.toFixed(3)}}&lambda;
+                      L={{singleStubParallelAnswer.open.l1.toFixed(3)}}&lambda;
+                    </div>
+                    <div class="half-width border">
+                      d={{singleStubParallelAnswer.d2.toFixed(3)}}&lambda;
+                      L={{singleStubParallelAnswer.open.l2.toFixed(3)}}&lambda;
+                    </div>
                   </div>
                 </div>
                 <div class="half-width d-flex flex-wrap justify-content-center border">
-                  <p class="row d-flex justify-content-center">端接短路</p>
-                  <div>
-                    d1={{oneStubParallelAnswer.d1.toFixed(3)}}&lambda;
-                    d2={{oneStubParallelAnswer.d2.toFixed(3)}}&lambda;
-                    L1={{oneStubParallelAnswer.short.l1.toFixed(3)}}&lambda;
-                    L2={{oneStubParallelAnswer.short.l2.toFixed(3)}}&lambda;
+                  <p class="row d-flex justify-content-center border">端接短路</p>
+                  <div class="d-flex flex-nowrap row">
+                    <div class="half-width border">
+                      d={{singleStubParallelAnswer.d1.toFixed(3)}}&lambda;
+                      L={{singleStubParallelAnswer.short.l1.toFixed(3)}}&lambda;
+                    </div>
+                    <div class="half-width border">
+                      d={{singleStubParallelAnswer.d2.toFixed(3)}}&lambda;
+                      L={{singleStubParallelAnswer.short.l2.toFixed(3)}}&lambda;
+                    </div>
                   </div>
                 </div>
               </div>
@@ -138,23 +146,31 @@
             </div>
             <div class="half-width d-flex flex-wrap border justify-content-center align-content-start">
               <p class="row d-flex justify-content-center border">串联</p>
-              <div class="row d-flex flex-nowrap" v-if="oneStubSerialAnswer!==null">
+              <div class="row d-flex flex-nowrap" v-if="singleStubSerialAnswer!==null">
                 <div class="half-width d-flex flex-wrap justify-content-center border">
-                  <p class="row d-flex justify-content-center">端接开路</p>
-                  <div>
-                    d1={{oneStubSerialAnswer.d1.toFixed(3)}}&lambda;
-                    d2={{oneStubSerialAnswer.d2.toFixed(3)}}&lambda;
-                    L1={{oneStubSerialAnswer.open.l1.toFixed(3)}}&lambda;
-                    L2={{oneStubSerialAnswer.open.l2.toFixed(3)}}&lambda;
+                  <p class="row d-flex justify-content-center border">端接开路</p>
+                  <div class="d-flex flex-nowrap row">
+                    <div class="half-width border">
+                      d={{singleStubSerialAnswer.d1.toFixed(3)}}&lambda;
+                      L={{singleStubSerialAnswer.open.l1.toFixed(3)}}&lambda;
+                    </div>
+                    <div class="half-width border">
+                      d={{singleStubSerialAnswer.d2.toFixed(3)}}&lambda;
+                      L={{singleStubSerialAnswer.open.l2.toFixed(3)}}&lambda;
+                    </div>
                   </div>
                 </div>
                 <div class="half-width d-flex flex-wrap justify-content-center border">
-                  <p class="row d-flex justify-content-center">端接短路</p>
-                  <div>
-                    d1={{oneStubSerialAnswer.d1.toFixed(3)}}&lambda;
-                    d2={{oneStubSerialAnswer.d2.toFixed(3)}}&lambda;
-                    L1={{oneStubSerialAnswer.short.l1.toFixed(3)}}&lambda;
-                    L2={{oneStubSerialAnswer.short.l2.toFixed(3)}}&lambda;
+                  <p class="row d-flex justify-content-center border">端接短路</p>
+                  <div class="d-flex flex-nowrap row">
+                    <div class="half-width border">
+                      d={{singleStubSerialAnswer.d1.toFixed(3)}}&lambda;
+                      L={{singleStubSerialAnswer.short.l1.toFixed(3)}}&lambda;
+                    </div>
+                    <div class="half-width border">
+                      d={{singleStubSerialAnswer.d2.toFixed(3)}}&lambda;
+                      L={{singleStubSerialAnswer.short.l2.toFixed(3)}}&lambda;
+                    </div>
                   </div>
                 </div>
               </div>
@@ -166,6 +182,40 @@
         </div>
         <div style="width: 100%">
           <h4>双枝节网络匹配</h4>
+          <div class="row d-flex flex-nowrap">
+            <div class="row d-flex flex-nowrap" v-if="doubleStubAnswer!==null">
+              <div class="half-width d-flex flex-wrap justify-content-center border">
+                <p class="row d-flex justify-content-center border">端接开路</p>
+                <div class="d-flex flex-nowrap row">
+                  <div class="half-width border">
+                    L1:{{doubleStubAnswer.open[0].l1.toFixed(3)}}&lambda;
+                    L2:{{doubleStubAnswer.open[0].l2.toFixed(3)}}&lambda;
+                  </div>
+                  <div class="half-width border">
+                    L1:{{doubleStubAnswer.open[1].l1.toFixed(3)}}&lambda;
+                    L2:{{doubleStubAnswer.open[1].l2.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+              </div>
+              <div class="half-width d-flex flex-wrap justify-content-center border">
+                <p class="row d-flex justify-content-center border">端接短路</p>
+                <div class="d-flex flex-nowrap row">
+                  <div class="half-width border">
+                    L1:{{doubleStubAnswer.short[0].l1.toFixed(3)}}&lambda;
+                    L2:{{doubleStubAnswer.short[0].l2.toFixed(3)}}&lambda;
+                  </div>
+                  <div class="half-width border">
+                    L1:{{doubleStubAnswer.short[1].l1.toFixed(3)}}&lambda;
+                    L2:{{doubleStubAnswer.short[1].l2.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <h4>三枝节网络匹配</h4>
         </div>
       </aside>
     </main>
@@ -175,6 +225,7 @@
 <script>
 // @ is an alias to /src
 import smith from '@/components/smith'
+import complex from 'complex.js'
 
 export default {
   name: 'Home',
@@ -193,8 +244,9 @@ export default {
         LCHighPass: null,
         CLHighPass: null
       },
-      oneStubParallelAnswer: null,
-      oneStubSerialAnswer: null,
+      singleStubParallelAnswer: null,
+      singleStubSerialAnswer: null,
+      doubleStubAnswer: null,
       enableResistanceAxis: true,
       enableAdmittanceAxis: false,
       smithCursor: null
@@ -239,18 +291,19 @@ export default {
         this.smithCursor = null
         return
       }
-      this.smithCursor = {
-        Z: [(1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y), 2 * y / ((1 - x) * (1 - x) + y * y)],
-        G: [1, 0]
-      }
+      const Z = [(1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y), 2 * y / ((1 - x) * (1 - x) + y * y)]
+      const G = complex(1).div(complex(Z[0], Z[1]))
+      this.smithCursor = { Z, G: [G.re, G.im] }
     },
     drawLNetPath () {
       console.debug(this.LNetSelect)
     },
     doMatch () {
       this.LNetText = this.LNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency)
-      this.oneStubParallelAnswer = this.oneStubParallel(this.Rl, this.Xl, this.Rs, this.Xs)
-      this.oneStubSerialAnswer = this.oneStubSerial(this.Rl, this.Xl, this.Rs, this.Xs)
+      this.singleStubParallelAnswer = this.singleStubParallel(this.Rl, this.Xl, this.Rs, this.Xs)
+      this.singleStubSerialAnswer = this.singleStubSerial(this.Rl, this.Xl, this.Rs, this.Xs)
+      // TODO: add d param
+      this.doubleStubAnswer = this.doubleStub(this.Rl, this.Xl, this.Rs, this.Xs, 1 / 8)
     },
     LCLP (Rs, Xs, Rl, Xl, f) {
       return this.CLLP(Rl, Xl, Rs, Xs, f)
@@ -319,7 +372,7 @@ export default {
         CLHighPass: this.CLHP(Rs, Xs, Rl, Xl, f)
       }
     },
-    oneStubParallel (Rl, Xl, Rs, Xs) {
+    singleStubParallel (Rl, Xl, Rs, Xs) {
       if (Xs !== 0) {
         return null
       }
@@ -351,7 +404,7 @@ export default {
         }
       }
     },
-    oneStubSerial (Rl, Xl, Rs, Xs) {
+    singleStubSerial (Rl, Xl, Rs, Xs) {
       if (Xs !== 0) {
         return null
       }
@@ -385,7 +438,70 @@ export default {
           l2: ls2 >= 0 ? ls2 : ls2 + 0.5
         }
       }
-    }
+    },
+    doubleStub (Rl, Xl, Rs, Xs, d, kLambda = 1) {
+      const zL = complex(Rl, Xl)
+      const z0 = complex(Rs, Xs)
+      const gammaL = (zL.sub(z0)).div(zL.add(z0))
+      const gammaLAbs = gammaL.abs() // real number
+      const gammaLAngle = gammaL.arg() // real number
+      const gamma11 = complex({ abs: gammaLAbs, arg: gammaLAngle - 4 * Math.PI * d })
+      const y11 = complex(1).sub(gamma11).div(complex(1).add(gamma11))
+      const G1 = y11.re
+      const B1 = y11.im
+      // check blind zone
+      if (kLambda === 2) {
+        if (G1 >= 1) {
+          //
+          return null
+        }
+      } else {
+        if (G1 >= 2) {
+          return null
+        }
+      }
+      const Ga = G1
+      let Ba1, Ba2, B31, B32
+      if (kLambda === 1) {
+        Ba1 = 1 + Math.sqrt(Ga * (2 - Ga))
+        Ba2 = 1 - Math.sqrt(Ga * (2 - Ga))
+        B31 = (1 - Ba1 ** 2 - Ga ** 2) / ((1 - Ba1) ** 2 + Ga ** 2)
+        B32 = (1 - Ba2 ** 2 - Ga ** 2) / ((1 - Ba2) ** 2 + Ga ** 2)
+      } else if (kLambda === 2) {
+        Ba1 = Math.sqrt(Ga * (1 - Ga))
+        Ba2 = -Math.sqrt(Ga * (1 - Ga))
+        B31 = -Ba1 / (Ga ^ 2 + Ba1 ** 2)
+        B32 = -Ba2 / (Ga ^ 2 + Ba2 ** 2)
+      } else if (kLambda === 3) {
+        Ba1 = -1 + Math.sqrt(Ga * (2 - Ga))
+        Ba2 = -1 - Math.sqrt(Ga * (2 - Ga))
+        B31 = (-1 + Ba1 ** 2 + Ga ** 2) / ((1 + Ba1) ** 2 + Ga ** 2)
+        B32 = (-1 + Ba2 ** 2 + Ga ** 2) / ((1 + Ba2) ** 2 + Ga ** 2)
+      } else {
+        return null
+      }
+      const B21 = Ba1 - B1
+      const B22 = Ba2 - B1
+      const B41 = -B31
+      const B42 = -B32
+      // acot(x) <=> atan(1/x)
+      const acot = x => Math.atan(1 / x)
+      const shiftToPositive = x => x > 0 ? x : x + 0.5
+      const LA1SH = shiftToPositive(acot(-B21) / (2 * Math.PI))
+      const LB1SH = shiftToPositive(acot(-B22) / (2 * Math.PI))
+      const LA2SH = shiftToPositive(acot(-B41) / (2 * Math.PI))
+      const LB2SH = shiftToPositive(acot(-B42) / (2 * Math.PI))
+      const shiftToPostive2 = x => x >= 0.25 ? x - 0.25 : x + 0.25
+      const LA1OP = shiftToPostive2(LA1SH)
+      const LB1OP = shiftToPostive2(LB1SH)
+      const LA2OP = shiftToPostive2(LA2SH)
+      const LB2OP = shiftToPostive2(LB2SH)
+      return {
+        open: [{ l1: LA1OP, l2: LA2OP }, { l1: LB1OP, l2: LB2OP }],
+        short: [{ l1: LA1SH, l2: LA2SH }, { l1: LB1SH, l2: LB2SH }]
+      }
+    },
+    tripleStub () {}
   }
 }
 </script>
