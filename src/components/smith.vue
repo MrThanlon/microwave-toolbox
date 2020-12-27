@@ -2,13 +2,13 @@
   <svg :width="length" :height="length" ref="svg" id="svg"
        @click="clickCallback"
        @mousemove="moveCallback"
-       @mouseout="$emit('v-mousemove', {x:null,y:null})"
-       @mousedown="mousedown=true"
-       @mouseup="mousedown=false">
+       @mouseleave="leaveCallback">
   </svg>
 </template>
 
 <script>
+import complex from 'complex.js'
+
 export default {
   name: 'smith',
   props: {
@@ -30,14 +30,25 @@ export default {
     },
     enableAdmittanceAxis: {
       type: Boolean,
+      default: false
+    },
+    enableResistanceCursor: {
+      type: Boolean,
       default: true
+    },
+    enableAdmittanceCursor: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
     return {
       realCircle: null,
       imageCircle: null,
-      mousedown: false
+      cursorResistanceRealCircle: null,
+      cursorResistanceImageCircle: null,
+      cursorAdmittanceRealCircle: null,
+      cursorAdmittanceImageCircle: null
     }
   },
   computed: {
@@ -46,6 +57,14 @@ export default {
     }
   },
   methods: {
+    xyToZ (x, y) {
+      return [(1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y), 2 * y / ((1 - x) * (1 - x) + y * y)]
+    },
+    xyToG (x, y) {
+      const Z = this.xyToZ(x, y)
+      const G = complex(1).div(complex(Z[0], Z[1]))
+      return [G.re, G.im]
+    },
     callback (e) {
       console.debug(e)
     },
@@ -117,6 +136,49 @@ export default {
       this.drawRealCircle(rl)
       this.drawImageCircle(xl)
     },
+    // FIXME: duplicated
+    drawResistanceCursorRealCircle (rl) {
+      if (this.cursorResistanceRealCircle === null) {
+        this.cursorResistanceRealCircle = this.createRealCircle(rl, 'blue')
+        this.$refs.svg.appendChild(this.cursorResistanceRealCircle)
+      } else {
+        const radius = 1 / (1 + rl)
+        this.cursorResistanceRealCircle.cx.baseVal.value = this.length - radius * this.lengthUnit
+        this.cursorResistanceRealCircle.r.baseVal.value = radius * this.lengthUnit
+        this.cursorResistanceRealCircle.style.display = ''
+      }
+    },
+    drawResistanceCursorImageCircle (xl) {
+      if (this.cursorResistanceImageCircle === null) {
+        this.cursorResistanceImageCircle = this.createImageCircle(xl, 'blue')
+        this.$refs.svg.appendChild(this.cursorResistanceImageCircle)
+      } else {
+        // modify
+        this.cursorResistanceImageCircle.attributes.d.nodeValue = this.createImageCircleCmd(xl)
+        this.cursorResistanceImageCircle.style.display = ''
+      }
+    },
+    drawAdmittanceCursorRealCircle (rl) {
+      if (this.cursorAdmittanceRealCircle === null) {
+        this.cursorAdmittanceRealCircle = this.createRealAdmittanceCircle(rl, 'green')
+        this.$refs.svg.appendChild(this.cursorAdmittanceRealCircle)
+      } else {
+        const radius = 1 / (1 + rl)
+        this.cursorAdmittanceRealCircle.cx.baseVal.value = radius * this.lengthUnit
+        this.cursorAdmittanceRealCircle.r.baseVal.value = radius * this.lengthUnit
+        this.cursorAdmittanceRealCircle.style.display = ''
+      }
+    },
+    drawAdmittanceCursorImageCircle (xl) {
+      if (this.cursorAdmittanceImageCircle === null) {
+        this.cursorAdmittanceImageCircle = this.createImageAdmittanceCircle(xl, 'green')
+        this.$refs.svg.appendChild(this.cursorAdmittanceImageCircle)
+      } else {
+        // modify
+        this.cursorAdmittanceImageCircle.attributes.d.nodeValue = this.createImageAdmittanceCircleCmd(xl)
+        this.cursorAdmittanceImageCircle.style.display = ''
+      }
+    },
     moveCallback (e) {
       if (e.target !== this.$refs.svg) {
         return
@@ -125,9 +187,39 @@ export default {
       const y = 1 - e.offsetY / this.lengthUnit
       // const rl = (1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y)
       // const xl = 2 * y / ((1 - x) * (1 - x) + y * y)
-      this.$emit('v-mousemove', { x, y })
       // this.drawRealCircle(rl)
       // this.drawImageCircle(xl)
+      if (this.enableResistanceCursor) {
+        // draw cursor
+        const Z = this.xyToZ(x, y)
+        if (isFinite(Z[0]) && isFinite(Z[1]) && Z[0] > 0) {
+          this.drawResistanceCursorRealCircle(Z[0])
+          this.drawResistanceCursorImageCircle(Z[1])
+        }
+      }
+      if (this.enableAdmittanceCursor) {
+        const G = this.xyToG(x, y)
+        if (isFinite(G[0] && isFinite(G[1]) && G[0] > 0)) {
+          this.drawAdmittanceCursorRealCircle(G[0])
+          this.drawAdmittanceCursorImageCircle(G[1])
+        }
+      }
+      this.$emit('v-mousemove', { x, y })
+    },
+    leaveCallback (e) {
+      this.$emit('v-mousemove', { x: null, y: null })
+      if (this.cursorResistanceRealCircle !== null) {
+        this.cursorResistanceRealCircle.style.display = 'none'
+      }
+      if (this.cursorResistanceImageCircle !== null) {
+        this.cursorResistanceImageCircle.style.display = 'none'
+      }
+      if (this.cursorAdmittanceRealCircle !== null) {
+        this.cursorAdmittanceRealCircle.style.display = 'none'
+      }
+      if (this.cursorAdmittanceImageCircle !== null) {
+        this.cursorAdmittanceImageCircle.style.display = 'none'
+      }
     },
     createRealCircle (rl, stroke = 'black') {
       const radius = 1 / (1 + rl)

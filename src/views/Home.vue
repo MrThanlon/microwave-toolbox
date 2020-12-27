@@ -6,7 +6,10 @@
                @v-mousemove="smithCursorCallback"
                :key="enableAdmittanceAxis+enableResistanceAxis"
                :enable-resistance-axis="enableResistanceAxis"
-               :enable-admittance-axis="enableAdmittanceAxis"></smith>
+               :enable-admittance-axis="enableAdmittanceAxis"
+               :enable-resistance-cursor="enableResistanceCursor"
+               :enable-admittance-cursor="enableAdmittanceCursor"
+        ></smith>
       </div>
       <aside style="width: 50%;display: flex;flex-wrap: wrap;text-align: start;align-content: start">
         <div style="width: 100%">
@@ -20,14 +23,14 @@
             虚轴
           </label>
           <label>
-            <input type="checkbox" checked>
+            <input type="checkbox" v-model="enableResistanceCursor">
             阻抗
             <span v-if="smithCursor!==null">
               &nbsp;Z={{renderComplex(smithCursor.Z[0].toFixed(3), smithCursor.Z[1].toFixed(3))}}
             </span>
           </label>
           <label>
-            <input type="checkbox" checked>
+            <input type="checkbox" v-model="enableAdmittanceCursor">
             导纳
             <span v-if="smithCursor!==null">
               &nbsp;G={{renderComplex(smithCursor.G[0].toFixed(3), smithCursor.G[1].toFixed(3))}}
@@ -211,11 +214,51 @@
                 </div>
               </div>
             </div>
+            <div v-else>
+              不适用
+            </div>
           </div>
         </div>
 
         <div class="row">
           <h4>三枝节网络匹配</h4>
+          <div class="row d-flex flex-nowrap">
+            <div class="row d-flex flex-nowrap" v-if="tripleStubAnswer!==null">
+              <div class="half-width d-flex flex-wrap justify-content-center border">
+                <p class="row d-flex justify-content-center border">端接开路</p>
+                <div class="d-flex flex-nowrap row">
+                  <div class="half-width border">
+                    L1:{{tripleStubAnswer.open[0].l1.toFixed(3)}}&lambda;
+                    L2:{{tripleStubAnswer.open[0].l2.toFixed(3)}}&lambda;
+                    L3:{{tripleStubAnswer.open[0].l3.toFixed(3)}}&lambda;
+                  </div>
+                  <div class="half-width border">
+                    L1:{{tripleStubAnswer.open[1].l1.toFixed(3)}}&lambda;
+                    L2:{{tripleStubAnswer.open[1].l2.toFixed(3)}}&lambda;
+                    L3:{{tripleStubAnswer.open[1].l3.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+              </div>
+              <div class="half-width d-flex flex-wrap justify-content-center border">
+                <p class="row d-flex justify-content-center border">端接短路</p>
+                <div class="d-flex flex-nowrap row">
+                  <div class="half-width border">
+                    L1:{{tripleStubAnswer.short[0].l1.toFixed(3)}}&lambda;
+                    L2:{{tripleStubAnswer.short[0].l2.toFixed(3)}}&lambda;
+                    L3:{{tripleStubAnswer.short[0].l3.toFixed(3)}}&lambda;
+                  </div>
+                  <div class="half-width border">
+                    L1:{{tripleStubAnswer.short[1].l1.toFixed(3)}}&lambda;
+                    L2:{{tripleStubAnswer.short[1].l2.toFixed(3)}}&lambda;
+                    L3:{{tripleStubAnswer.short[1].l3.toFixed(3)}}&lambda;
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              不适用
+            </div>
+          </div>
         </div>
       </aside>
     </main>
@@ -247,8 +290,11 @@ export default {
       singleStubParallelAnswer: null,
       singleStubSerialAnswer: null,
       doubleStubAnswer: null,
+      tripleStubAnswer: null,
       enableResistanceAxis: true,
       enableAdmittanceAxis: false,
+      enableResistanceCursor: true,
+      enableAdmittanceCursor: false,
       smithCursor: null
     }
   },
@@ -304,6 +350,7 @@ export default {
       this.singleStubSerialAnswer = this.singleStubSerial(this.Rl, this.Xl, this.Rs, this.Xs)
       // TODO: add d param
       this.doubleStubAnswer = this.doubleStub(this.Rl, this.Xl, this.Rs, this.Xs, 1 / 8)
+      this.tripleStubAnswer = this.tripleStub(this.Rl, this.Xl, this.Rs, this.Xs, 1 / 8)
     },
     LCLP (Rs, Xs, Rl, Xl, f) {
       return this.CLLP(Rl, Xl, Rs, Xs, f)
@@ -501,7 +548,60 @@ export default {
         short: [{ l1: LA1SH, l2: LA2SH }, { l1: LB1SH, l2: LB2SH }]
       }
     },
-    tripleStub () {}
+    tripleStub (Rl, Xl, Rs, Xs, d) {
+      // same as above
+      const zL = complex(Rl, Xl)
+      const z0 = complex(Rs, Xs)
+      const gammaL = (zL.sub(z0)).div(zL.add(z0))
+      const gammaLAbs = gammaL.abs() // real number
+      const gammaLAngle = gammaL.arg() // real number
+      const gamma11 = complex({ abs: gammaLAbs, arg: gammaLAngle - 4 * Math.PI * d })
+      const y11 = complex(1).sub(gamma11).div(complex(1).add(gamma11))
+      const G1 = y11.re
+      // const B1 = y11.im // unused
+      let LA1SH, LA2SH, LA3SH
+      let LB1SH, LB2SH, LB3SH
+      if (G1 >= 1) {
+        LA1SH = 0.25
+        LB1SH = 0.25
+        const tmp = this.doubleStub(Rl, Xl, Rs, Xs, d + 0.25, 2)
+        if (tmp === null) {
+          return null
+        }
+        LA2SH = tmp.short[0].l1
+        LA3SH = tmp.short[0].l2
+        LB2SH = tmp.short[1].l1
+        LB3SH = tmp.short[1].l2
+      } else {
+        LA3SH = 0.25
+        LB3SH = 0.25
+        const tmp = this.doubleStub(Rl, Xl, Rs, Xs, d + 0.25, 2)
+        if (tmp === null) {
+          return null
+        }
+        LA1SH = tmp.short[0].l1
+        LA2SH = tmp.short[0].l2
+        LB1SH = tmp.short[1].l1
+        LB2SH = tmp.short[1].l2
+      }
+      const shiftToPostive2 = x => x >= 0.25 ? x - 0.25 : x + 0.25
+      const LA1OP = shiftToPostive2(LA1SH)
+      const LA2OP = shiftToPostive2(LA2SH)
+      const LA3OP = shiftToPostive2(LA3SH)
+      const LB1OP = shiftToPostive2(LB1SH)
+      const LB2OP = shiftToPostive2(LB2SH)
+      const LB3OP = shiftToPostive2(LB3SH)
+      return {
+        open: [
+          { l1: LA1OP, l2: LA2OP, l3: LA3OP },
+          { l1: LB1OP, l2: LB2OP, l3: LB3OP }
+        ],
+        short: [
+          { l1: LA1SH, l2: LA2SH, l3: LA3SH },
+          { l1: LB1SH, l2: LB2SH, l3: LB3SH }
+        ]
+      }
+    }
   }
 }
 </script>

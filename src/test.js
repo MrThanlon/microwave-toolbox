@@ -3,7 +3,7 @@ const complex = require('complex.js')
 function doubleStub (Rl, Xl, Rs, Xs, d, kLambda = 1) {
   const zL = complex(Rl, Xl)
   const z0 = complex(Rs, Xs)
-  const gammaL = zL.sub(z0).div(zL.add(z0))
+  const gammaL = (zL.sub(z0)).div(zL.add(z0))
   const gammaLAbs = gammaL.abs() // real number
   const gammaLAngle = gammaL.arg() // real number
   const gamma11 = complex({ abs: gammaLAbs, arg: gammaLAngle - 4 * Math.PI * d })
@@ -63,4 +63,59 @@ function doubleStub (Rl, Xl, Rs, Xs, d, kLambda = 1) {
   }
 }
 
-console.debug(doubleStub(50, 0, 50, 0, 1 / 8))
+function tripleStub (Rl, Xl, Rs, Xs, d) {
+  // same as above
+  const zL = complex(Rl, Xl)
+  const z0 = complex(Rs, Xs)
+  const gammaL = (zL.sub(z0)).div(zL.add(z0))
+  const gammaLAbs = gammaL.abs() // real number
+  const gammaLAngle = gammaL.arg() // real number
+  const gamma11 = complex({ abs: gammaLAbs, arg: gammaLAngle - 4 * Math.PI * d })
+  const y11 = complex(1).sub(gamma11).div(complex(1).add(gamma11))
+  const G1 = y11.re
+  // const B1 = y11.im // unused
+  let LA1SH, LA2SH, LA3SH
+  let LB1SH, LB2SH, LB3SH
+  if (G1 >= 1) {
+    LA1SH = 0.25
+    LB1SH = 0.25
+    const tmp = doubleStub(Rl, Xl, Rs, Xs, d + 0.25, 2)
+    if (tmp === null) {
+      return null
+    }
+    LA2SH = tmp.short[0].l1
+    LA3SH = tmp.short[0].l2
+    LB2SH = tmp.short[1].l1
+    LB3SH = tmp.short[1].l2
+  } else {
+    LA3SH = 0.25
+    LB3SH = 0.25
+    const tmp = doubleStub(Rl, Xl, Rs, Xs, d + 0.25, 2)
+    if (tmp === null) {
+      return null
+    }
+    LA1SH = tmp.short[0].l1
+    LA2SH = tmp.short[0].l2
+    LB1SH = tmp.short[1].l1
+    LB2SH = tmp.short[1].l2
+  }
+  const shiftToPostive2 = x => x >= 0.25 ? x - 0.25 : x + 0.25
+  const LA1OP = shiftToPostive2(LA1SH)
+  const LA2OP = shiftToPostive2(LA2SH)
+  const LA3OP = shiftToPostive2(LA3SH)
+  const LB1OP = shiftToPostive2(LB1SH)
+  const LB2OP = shiftToPostive2(LB2SH)
+  const LB3OP = shiftToPostive2(LB3SH)
+  return {
+    open: [
+      { l1: LA1OP, l2: LA2OP, l3: LA3OP },
+      { l1: LB1OP, l2: LB2OP, l3: LB3OP }
+    ],
+    short: [
+      { l1: LA1SH, l2: LA2SH, l3: LA3SH },
+      { l1: LB1SH, l2: LB2SH, l3: LB3SH }
+    ]
+  }
+}
+
+console.debug(tripleStub(50, 0, 50, 0, 1 / 8))
