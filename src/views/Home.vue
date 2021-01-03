@@ -106,9 +106,55 @@
         </div>
         <div style="width: 100%">
           <h4>T型网络匹配</h4>
+          <div v-if="TNetAnswer!==null" class="d-flex flex-wrap">
+            <div style="width: 50%">
+              <label>
+                Highpass
+                <input type="radio" name="tnet-select" value="hp">
+              </label>
+              <p>Cs:{{TNetAnswer.HighPass.Cs.toFixed(3)}}&nbsp;pF</p>
+              <p>Cl:{{TNetAnswer.HighPass.Cl.toFixed(3)}}&nbsp;pF</p>
+              <p>L:{{TNetAnswer.HighPass.L.toFixed(3)}}&nbsp;nH</p>
+            </div>
+            <div style="width: 50%">
+              <label>
+                Lowpass
+                <input type="radio" name="tnet-select" value="lp">
+              </label>
+              <p>Ls:{{TNetAnswer.LowPass.Ls.toFixed(3)}}&nbsp;nH</p>
+              <p>Ll:{{TNetAnswer.LowPass.Ll.toFixed(3)}}&nbsp;nH</p>
+              <p>C:{{TNetAnswer.LowPass.C.toFixed(3)}}&nbsp;pF</p>
+            </div>
+          </div>
+          <div v-else>
+            不适用
+          </div>
         </div>
         <div style="width: 100%">
           <h4>PI型网络匹配</h4>
+          <div v-if="PiNetAnswer!==null" class="d-flex flex-wrap">
+            <div style="width: 50%">
+              <label>
+                Highpass
+                <input type="radio" name="pinet-select" value="hp">
+              </label>
+              <p>Ls:{{PiNetAnswer.HighPass.Ls.toFixed(3)}}&nbsp;nH</p>
+              <p>Ll:{{PiNetAnswer.HighPass.Ll.toFixed(3)}}&nbsp;nH</p>
+              <p>C:{{PiNetAnswer.HighPass.C.toFixed(3)}}&nbsp;pF</p>
+            </div>
+            <div style="width: 50%">
+              <label>
+                Lowpass
+                <input type="radio" name="pinet-select" value="lp">
+              </label>
+              <p>Cs:{{PiNetAnswer.LowPass.Cs.toFixed(3)}}&nbsp;pF</p>
+              <p>Cl:{{PiNetAnswer.LowPass.Cl.toFixed(3)}}&nbsp;pF</p>
+              <p>L:{{PiNetAnswer.LowPass.L.toFixed(3)}}&nbsp;nH</p>
+            </div>
+          </div>
+          <div v-else>
+            不适用
+          </div>
         </div>
         <div class="row d-flex flex-wrap">
           <h4 class="row">单枝节网络匹配</h4>
@@ -279,7 +325,7 @@ export default {
       RlText: '50',
       XlText: '0',
       frequencyText: '1e9',
-      targetQText: '',
+      targetQText: '3',
       LNetSelect: null,
       LNetText: {
         LCLowPass: null,
@@ -287,6 +333,8 @@ export default {
         LCHighPass: null,
         CLHighPass: null
       },
+      TNetAnswer: null,
+      PiNetAnswer: null,
       singleStubParallelAnswer: null,
       singleStubSerialAnswer: null,
       doubleStubAnswer: null,
@@ -303,6 +351,7 @@ export default {
     Xs () { return parseFloat(this.XsText) },
     Rl () { return parseFloat(this.RlText) },
     Xl () { return parseFloat(this.XlText) },
+    targetQ () { return parseFloat(this.targetQText) },
     frequency () { return parseFloat(this.frequencyText) },
     zr () {
       return (this.Rl * this.Rs + this.Xl * this.Xs) / (this.Rs * this.Rs + this.Xs * this.Xs)
@@ -346,6 +395,8 @@ export default {
     },
     doMatch () {
       this.LNetText = this.LNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency)
+      this.TNetAnswer = this.TNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency, this.targetQ)
+      this.PiNetAnswer = this.PiNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency, this.targetQ)
       this.singleStubParallelAnswer = this.singleStubParallel(this.Rl, this.Xl, this.Rs, this.Xs)
       this.singleStubSerialAnswer = this.singleStubSerial(this.Rl, this.Xl, this.Rs, this.Xs)
       // TODO: add d param
@@ -417,6 +468,120 @@ export default {
         CLLowPass: this.CLLP(Rs, Xs, Rl, Xl, f),
         LCHighPass: this.LCHP(Rs, Xs, Rl, Xl, f),
         CLHighPass: this.CLHP(Rs, Xs, Rl, Xl, f)
+      }
+    },
+    TNet (Rs, Xs, Rl, Xl, f, Q = 0) {
+      if (Q < 0) { return null }
+      if (Q === 0 && Rl === Rs) {
+        return {
+          HighPass: {
+            Cs: 0, Cl: 0, L: 0
+          },
+          LowPass: {
+            Ls: 0, Ll: 0, C: 0
+          }
+        }
+      }
+      if (Q < Math.sqrt(Math.max(Rs, Rl) / Math.min(Rs, Rl) - 1)) {
+        return null
+      }
+      const Rv = Math.min(Rs, Rl) * (Q * Q + 1)
+      const omega = 2 * Math.PI * f
+      // cs-l-cl t network matching
+      let q = Math.sqrt(Rv / Rs - 1)
+      let Cs = 1 / omega / Rs / q
+      if (Xs !== 0) {
+        if (Cs === (-1 / omega / Xs)) {
+          Cs = Number.POSITIVE_INFINITY
+        } else {
+          Cs = Cs * (-1 / omega / Xs) / (Cs + 1 / omega / Xs)
+        }
+      }
+      const Cst = Cs
+      let Ls = Rv / omega / q
+      q = Math.sqrt(Rv / Rl - 1) // start load matching
+      let Cl = 1 / omega / Rl / q
+      if (Xl !== 0) {
+        if (Cl === (-1 / omega / Xs)) {
+          Cl = Number.POSITIVE_INFINITY
+        } else {
+          Cl = Cl * (-1 / omega / Xs) / (Cl + 1 / omega / Xs)
+        }
+      }
+      const Clt = Cl
+      let Ll = Rv / omega / q
+      const L = Ll * Ls / (Ll + Ls)
+      q = Math.sqrt(Rv / Rs - 1) // start source matching
+      Ls = q * Rs / omega - Xs / omega
+      Cs = q / omega / Rv
+      q = Math.sqrt(Rv / Rl - 1) // start load matching
+      Ll = q * Rl / omega - Xl / omega
+      Cl = q / omega / Rv
+      const C = Cs + Cl
+      return {
+        HighPass: {
+          Cs: Cst * 1e12, Cl: Clt * 1e12, L: L * 1e9
+        },
+        LowPass: {
+          Ls: Ls * 1e9, Ll: Ll * 1e9, C: C * 1e12
+        }
+      }
+    },
+    PiNet (Rs, Xs, Rl, Xl, f, Q = 0) {
+      if (Q < 0) { return null }
+      if (Q === 0 && Rs === Rl) {
+        return {
+          HighPass: {
+            Ls: 0, Ll: 0, C: 0
+          },
+          LowPass: {
+            Cs: 0, Cl: 0, L: 0
+          }
+        }
+      }
+      if (Q < Math.sqrt(Math.max(Rs, Rl) / Math.min(Rs, Rl) - 1)) {
+        return null
+      }
+      const Rv = Math.max(Rs, Rl) / (Q * Q + 1)
+      const omega = 2 * Math.PI * f
+      const Qs = -Xs / Rs // find parallel circuits
+      const Ql = -Xl / Rl
+      const Rps = Rs * (1 + Qs * Qs)
+      const Rpl = Rl * (1 + Ql * Ql)
+      // cs-l-cl pi network matching
+      const Cps = Qs / Rps / omega
+      const Cpl = Ql / Rpl / omega
+      let q = Math.sqrt(Rps / Rv - 1) // start source matching
+      let Cs = q / omega / Rps - Cps
+      const Cst = Cs
+      let Ls = q * Rv / omega
+      q = Math.sqrt(Rpl / Rv - 1) // start load matching
+      let Cl = q / omega / Rpl - Cpl
+      const Clt = Cl
+      let Ll = q * Rv / omega
+      const L = Ls + Ll
+      q = Math.sqrt(Rps / Rv - 1) // start source matching
+      Ls = Rps / omega / q
+      if (Qs !== 0) {
+        const Lps = Rps / Qs / omega
+        Ls = Ls * Lps / (Ls - Lps)
+      }
+      Cs = 1 / omega / q / Rv
+      q = Math.sqrt(Rpl / Rv - 1) // start load matching
+      Ll = Rpl / omega / q
+      if (Ql !== 0) {
+        const Lpl = Rpl / Ql / omega
+        Ll = Ll * Lpl / (Ll - Lpl)
+      }
+      Cl = 1 / omega / q / Rv
+      const C = Cl * Cs / (Cl + Cs)
+      return {
+        HighPass: {
+          Ls: Ls * 1e9, Ll: Ll * 1e9, C: C * 1e12
+        },
+        LowPass: {
+          Cs: Cst * 1e12, Cl: Clt * 1e12, L: L * 1e9
+        }
       }
     },
     singleStubParallel (Rl, Xl, Rs, Xs) {
