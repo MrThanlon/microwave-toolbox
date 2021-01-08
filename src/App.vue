@@ -1,6 +1,16 @@
 <template>
-  <div id="app">
-    <router-view/>
+  <div id="app" class="m-0 m-md-3">
+    <div class="d-flex justify-content-center">
+      <button class="btn btn-outline-primary m-2" @click="$router.push('/match')">
+        匹配工具箱
+      </button>
+      <button class="btn btn-outline-success m-2" @click="$router.push('/smith')">
+        Smith圆图工具
+      </button>
+    </div>
+    <keep-alive>
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
