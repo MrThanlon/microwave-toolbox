@@ -1,4 +1,3 @@
-// import complex from 'complex.js'
 const complex = require('complex.js')
 
 export default {
@@ -211,7 +210,7 @@ export default {
       }
     }
   },
-  singleStubParallel (Rl, Xl, Rs, Xs) {
+  singleStubParallel (Rs, Xs, Rl, Xl) {
     if (Xs !== 0 || Xl !== 0) {
       return null
     }
@@ -243,7 +242,7 @@ export default {
       }
     }
   },
-  singleStubSerial (Rl, Xl, Rs, Xs) {
+  singleStubSerial (Rs, Xs, Rl, Xl) {
     if (Xs !== 0 || Xl !== 0) {
       return null
     }
@@ -280,7 +279,7 @@ export default {
   },
   shiftToPositive: x => x > 0 ? x : x + 0.5,
   shiftToPositive2: x => x >= 0.25 ? x - 0.25 : x + 0.25,
-  doubleStub (Rl, Xl, Rs, Xs, d, kLambda = 1) {
+  doubleStub (Rs, Xs, Rl, Xl, d, kLambda = 1) {
     const zL = complex(Rl, Xl)
     const z0 = complex(Rs, Xs)
     const gammaL = (zL.sub(z0)).div(zL.add(z0))
@@ -355,7 +354,7 @@ export default {
       }]
     }
   },
-  tripleStub (Rl, Xl, Rs, Xs, d) {
+  tripleStub (Rs, Xs, Rl, Xl, d) {
     if (Rl === Rs && Xl === 0 && Xs === 0) {
       return {
         open: [{ l1: 0, l2: 0, l3: 0 },
@@ -384,7 +383,7 @@ export default {
     if (G1 >= 1) {
       LA1SH = 0.25
       LB1SH = 0.25
-      const tmp = this.doubleStub(Rl, Xl, Rs, Xs, d + 0.25, 2)
+      const tmp = this.doubleStub(Rs, Xs, Rl, Xl, d + 0.25, 2)
       if (tmp === null) {
         return null
       }
@@ -395,7 +394,7 @@ export default {
     } else {
       LA3SH = 0.25
       LB3SH = 0.25
-      const tmp = this.doubleStub(Rl, Xl, Rs, Xs, d, 2)
+      const tmp = this.doubleStub(Rs, Xs, Rl, Xl, d, 2)
       if (tmp === null) {
         return null
       }
@@ -417,6 +416,32 @@ export default {
       short: [{ l1: LA1SH, l2: LA2SH, l3: LA3SH },
         { l1: LB1SH, l2: LB2SH, l3: LB3SH }
       ]
+    }
+  },
+  quarterLambda (Rs, Xs, Rl, Xl) {
+    const Zl = complex(Rl, Xl)
+    const Zs = complex(Rs, Xs)
+    const gammaL = Zl.sub(Zs).div(Zl.add(Zs))
+    const gammaLAbs = gammaL.abs()
+    const gammaLAngle = gammaL.arg()
+    let distance
+    let gammaIn
+    if (gammaLAngle >= 0 && gammaLAngle < Math.PI) {
+      distance = gammaLAngle / (4 * Math.PI)
+      gammaIn = gammaL.abs()
+    } else if (-Math.PI < gammaLAngle && gammaLAngle < 0) {
+      distance = (gammaLAngle + Math.PI) / (4 * Math.PI)
+      gammaIn = -gammaL.abs()
+    } else if (gammaLAngle === Math.PI) {
+      distance = 0
+      gammaIn = -gammaLAbs
+    } else {
+      return null
+    }
+    const Zin = Zs * (1 + gammaIn) / (1 - gammaIn)
+    return {
+      Z1: Math.sqrt(Zin * Zs),
+      d: distance
     }
   }
 }

@@ -124,6 +124,10 @@ export default {
         {
           text: '三枝节网络匹配',
           component: () => import('@/components/tripleStubMatch')
+        },
+        {
+          text: '四分之一波长变换器',
+          component: () => import('@/components/quarterLambdaMatch')
         }
       ],
       matchMethod: LNetMatch,
