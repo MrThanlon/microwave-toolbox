@@ -14,30 +14,35 @@
       </select>
     </div>
 
-    <div v-for="(item, idx) in answer" :key="idx">
-      <label>解{{idx+1}}</label>
-      <div class="input-group mb-2">
-        <span class="input-group-text">第一枝节</span>
-        <input class="form-control" disabled :value="item.l1.toFixed(3)">
-        <span class="input-group-text">&lambda;</span>
-        <input class="form-control" disabled :value="(3e11/frequency*item.l1).toFixed(3)">
-        <span class="input-group-text">mm</span>
-      </div>
+    <img :src="imgPath" width="200">
 
-      <div class="input-group mb-2">
-        <span class="input-group-text">第二枝节</span>
-        <input class="form-control" disabled :value="item.l2.toFixed(3)">
-        <span class="input-group-text">&lambda;</span>
-        <input class="form-control" disabled :value="(3e11/frequency*item.l2).toFixed(3)">
-        <span class="input-group-text">mm</span>
-      </div>
+    <div v-if="answer===null">不适用</div>
+    <div v-else>
+      <div v-for="(item, idx) in answer" :key="idx">
+        <label>解{{idx+1}}</label>
+        <div class="input-group mb-2">
+          <span class="input-group-text">第一枝节</span>
+          <input class="form-control" disabled :value="item.l1.toFixed(3)">
+          <span class="input-group-text">&lambda;</span>
+          <input class="form-control" disabled :value="(3e11/frequency*item.l1).toFixed(3)">
+          <span class="input-group-text">mm</span>
+        </div>
 
-      <div class="input-group">
-        <span class="input-group-text">第三枝节</span>
-        <input class="form-control" disabled :value="item.l3.toFixed(3)">
-        <span class="input-group-text">&lambda;</span>
-        <input class="form-control" disabled :value="(3e11/frequency*item.l3).toFixed(3)">
-        <span class="input-group-text">mm</span>
+        <div class="input-group mb-2">
+          <span class="input-group-text">第二枝节</span>
+          <input class="form-control" disabled :value="item.l2.toFixed(3)">
+          <span class="input-group-text">&lambda;</span>
+          <input class="form-control" disabled :value="(3e11/frequency*item.l2).toFixed(3)">
+          <span class="input-group-text">mm</span>
+        </div>
+
+        <div class="input-group">
+          <span class="input-group-text">第三枝节</span>
+          <input class="form-control" disabled :value="item.l3.toFixed(3)">
+          <span class="input-group-text">&lambda;</span>
+          <input class="form-control" disabled :value="(3e11/frequency*item.l3).toFixed(3)">
+          <span class="input-group-text">mm</span>
+        </div>
       </div>
     </div>
   </div>
@@ -68,6 +73,9 @@ export default {
     answer () {
       const answer = matches.tripleStub(this.Rs, this.Xs, this.Rl, this.Xl, this.d1)
       return answer !== null ? answer[this.terminationLoad] : null
+    },
+    imgPath () {
+      return `/static/stub/triple_${this.terminationLoad}.png`
     }
   }
 }

@@ -23,6 +23,8 @@
       </select>
     </div>
 
+    <img :src="imgPath" width="200">
+
     <div v-for="(item,idx) in answer" :key="idx">
       <label>解{{idx+1}}</label>
       <div class="input-group mb-2">
@@ -73,6 +75,9 @@ export default {
     answer () {
       const answer = matches.doubleStub(this.Rs, this.Xs, this.Rl, this.Xl, parseFloat(this.d1), this.kLambda)
       return answer !== null ? answer[this.terminationLoad] : null
+    },
+    imgPath () {
+      return `/static/stub/double_${this.terminationLoad}.png`
     }
   }
 }

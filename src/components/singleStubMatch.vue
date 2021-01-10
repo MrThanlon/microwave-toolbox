@@ -18,6 +18,8 @@
         </select>
       </div>
 
+      <img :src="imgPath" width="200">
+
       <div v-if="answer!==null">
         <label>解1</label>
         <div class="input-group mb-2">
@@ -110,6 +112,9 @@ export default {
     },
     length2Millimeter () {
       return 3e11 / this.frequency * this.length2Lambda
+    },
+    imgPath () {
+      return `/static/stub/single_${this.connectType}_${this.terminationLoad}.png`
     }
   }
 }
