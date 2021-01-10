@@ -4,8 +4,6 @@ import Home from '../views/Home.vue'
 import Test from '../views/Test'
 import Match from '@/views/Match'
 
-import 'bootstrap/dist/css/bootstrap.min.css'
-
 Vue.use(VueRouter)
 
 const routes = [

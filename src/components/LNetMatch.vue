@@ -13,19 +13,19 @@
       </div>
       <img :src="imgPath" width="200">
       <div class="input-group mb-2" v-if="answer!==null">
-        <span class="input-group-text">L</span>
+        <span class="input-group-text" v-html="mathRender('L')"></span>
         <input class="form-control" disabled :value="answer.L.toFixed(3)">
         <span class="input-group-text">nH</span>
       </div>
 
       <div class="input-group mb-2" v-if="answer!==null">
-        <span class="input-group-text">C</span>
+        <span class="input-group-text" v-html="mathRender('C')"></span>
         <input class="form-control" disabled :value="answer.C.toFixed(3)">
         <span class="input-group-text">pF</span>
       </div>
 
       <div class="input-group" v-if="answer!==null">
-        <span class="input-group-text">Q</span>
+        <span class="input-group-text" v-html="mathRender('Q')"></span>
         <input class="form-control" disabled :value="answer.Q.toFixed(3)">
       </div>
       <div v-else>不适用</div>
@@ -35,6 +35,7 @@
 
 <script>
 import matches from '@/matches'
+import katex from 'katex'
 export default {
   name: 'LNetMatch',
   props: {
@@ -59,6 +60,13 @@ export default {
     imgPath () {
       const imgMap = { LCLP: 3, LCHP: 1, CLLP: 2, CLHP: 4 }
       return `static/LTPi/L${imgMap[this.connectType]}.png`
+    }
+  },
+  methods: {
+    mathRender (s) {
+      return katex.renderToString(s, {
+        throwOnError: false
+      })
     }
   }
 }

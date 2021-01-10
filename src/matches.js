@@ -302,12 +302,12 @@ export default {
     const B1 = y11.im
     // check blind zone
     if (kLambda === 2) {
-      if (G1 >= 1) {
+      if (G1 > 1) {
         //
         return null
       }
     } else {
-      if (G1 >= 2) {
+      if (G1 > 2) {
         return null
       }
     }
@@ -388,7 +388,7 @@ export default {
     // const B1 = y11.im // unused
     let LA1SH, LA2SH, LA3SH
     let LB1SH, LB2SH, LB3SH
-    if (G1 >= 1) {
+    if (G1 > 1) {
       LA1SH = 0.25
       LB1SH = 0.25
       const tmp = this.doubleStub(Rs, Xs, Rl, Xl, d + 0.25, 2)

@@ -15,17 +15,17 @@
     <img :src="imgPath" width="200">
     <div v-if="connectType==='LowPass'">
       <div class="input-group mb-2">
-        <span class="input-group-text">L1</span>
+        <span class="input-group-text" v-html="mathRender('L_1')"></span>
         <input class="form-control" disabled :value="answer.Ls.toFixed(3)">
         <span class="input-group-text">nH</span>
       </div>
       <div class="input-group mb-2">
-        <span class="input-group-text">C</span>
+        <span class="input-group-text" v-html="mathRender('C')"></span>
         <input class="form-control" disabled :value="answer.C.toFixed(3)">
         <span class="input-group-text">pF</span>
       </div>
       <div class="input-group">
-        <span class="input-group-text">L2</span>
+        <span class="input-group-text" v-html="mathRender('L_2')"></span>
         <input class="form-control" disabled :value="answer.Ll.toFixed(3)">
         <span class="input-group-text">nH</span>
       </div>
@@ -33,17 +33,17 @@
 
     <div v-else>
       <div class="input-group mb-2">
-        <span class="input-group-text">C1</span>
+        <span class="input-group-text" v-html="mathRender('C_1')"></span>
         <input class="form-control" disabled :value="answer.Cs.toFixed(3)">
         <span class="input-group-text">pF</span>
       </div>
       <div class="input-group mb-2">
-        <span class="input-group-text">L</span>
+        <span class="input-group-text" v-html="mathRender('L')"></span>
         <input class="form-control" disabled :value="answer.L.toFixed(3)">
         <span class="input-group-text">nH</span>
       </div>
       <div class="input-group">
-        <span class="input-group-text">C2</span>
+        <span class="input-group-text" v-html="mathRender('C_2')"></span>
         <input class="form-control" disabled :value="answer.Cl.toFixed(3)">
         <span class="input-group-text">pF</span>
       </div>
@@ -53,6 +53,7 @@
 
 <script>
 import matches from '@/matches'
+import katex from 'katex'
 export default {
   name: 'TNetMatch',
   props: {
@@ -80,6 +81,13 @@ export default {
     },
     imgPath () {
       return `static/LTPi/T${this.connectType === 'LowPass' ? 2 : 1}.png`
+    }
+  },
+  methods: {
+    mathRender (s) {
+      return katex.renderToString(s, {
+        throwOnError: false
+      })
     }
   }
 }

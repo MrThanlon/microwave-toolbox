@@ -1,24 +1,22 @@
 <template>
   <div>
-    <button @click="btnCallback">+1s</button>
-    <p>ZYF:{{zyfText}}</p>
+    <span ref="math"></span>
   </div>
 </template>
 
 <script>
-let zyf = 123
+import katex from 'katex'
 export default {
   name: 'Test',
-  computed: {
-    zyfText () {
-      return zyf + 's'
+  data () {
+    return {
+      renderString: ''
     }
   },
-  methods: {
-    btnCallback () {
-      zyf -= 1
-      console.log(zyf)
-    }
+  mounted () {
+    katex.render('c = \\pm\\sqrt{a^2 + b^2}', this.$refs.math, {
+      throwOnError: false
+    })
   }
 }
 </script>

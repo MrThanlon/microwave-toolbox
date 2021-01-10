@@ -21,7 +21,7 @@
       <div v-for="(item, idx) in answer" :key="idx">
         <label>解{{idx+1}}</label>
         <div class="input-group mb-2">
-          <span class="input-group-text">第一枝节</span>
+          <span class="input-group-text">第一枝节长度<span v-html="mathRender('l_1')"></span></span>
           <input class="form-control" disabled :value="item.l1.toFixed(3)">
           <span class="input-group-text">&lambda;</span>
           <input class="form-control" disabled :value="(3e11/frequency*item.l1).toFixed(3)">
@@ -29,7 +29,7 @@
         </div>
 
         <div class="input-group mb-2">
-          <span class="input-group-text">第二枝节</span>
+          <span class="input-group-text">第二枝节长度<span v-html="mathRender('l_2')"></span></span>
           <input class="form-control" disabled :value="item.l2.toFixed(3)">
           <span class="input-group-text">&lambda;</span>
           <input class="form-control" disabled :value="(3e11/frequency*item.l2).toFixed(3)">
@@ -37,7 +37,7 @@
         </div>
 
         <div class="input-group">
-          <span class="input-group-text">第三枝节</span>
+          <span class="input-group-text">第三枝节长度<span v-html="mathRender('l_3')"></span></span>
           <input class="form-control" disabled :value="item.l3.toFixed(3)">
           <span class="input-group-text">&lambda;</span>
           <input class="form-control" disabled :value="(3e11/frequency*item.l3).toFixed(3)">
@@ -50,6 +50,7 @@
 
 <script>
 import matches from '@/matches'
+import katex from 'katex'
 
 export default {
   name: 'trippleStubMatch',
@@ -76,6 +77,13 @@ export default {
     },
     imgPath () {
       return `static/stub/triple_${this.terminationLoad}.png`
+    }
+  },
+  methods: {
+    mathRender (s) {
+      return katex.renderToString(s, {
+        throwOnError: false
+      })
     }
   }
 }
