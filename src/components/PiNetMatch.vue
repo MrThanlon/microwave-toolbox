@@ -79,7 +79,7 @@ export default {
       return matches.PiNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency, this.targetQ)[this.connectType]
     },
     imgPath () {
-      return `/static/LTPi/Pi${this.connectType === 'LowPass' ? 1 : 2}.png`
+      return `static/LTPi/Pi${this.connectType === 'LowPass' ? 1 : 2}.png`
     }
   }
 }

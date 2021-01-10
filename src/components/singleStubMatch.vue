@@ -114,7 +114,7 @@ export default {
       return 3e11 / this.frequency * this.length2Lambda
     },
     imgPath () {
-      return `/static/stub/single_${this.connectType}_${this.terminationLoad}.png`
+      return `static/stub/single_${this.connectType}_${this.terminationLoad}.png`
     }
   }
 }

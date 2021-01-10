@@ -77,7 +77,7 @@ export default {
       return answer !== null ? answer[this.terminationLoad] : null
     },
     imgPath () {
-      return `/static/stub/double_${this.terminationLoad}.png`
+      return `static/stub/double_${this.terminationLoad}.png`
     }
   }
 }

@@ -58,7 +58,7 @@ export default {
     },
     imgPath () {
       const imgMap = { LCLP: 3, LCHP: 1, CLLP: 2, CLHP: 4 }
-      return `/static/LTPi/L${imgMap[this.connectType]}.png`
+      return `static/LTPi/L${imgMap[this.connectType]}.png`
     }
   }
 }

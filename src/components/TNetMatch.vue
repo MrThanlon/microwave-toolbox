@@ -79,7 +79,7 @@ export default {
       return matches.TNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency, this.targetQ)[this.connectType]
     },
     imgPath () {
-      return `/static/LTPi/T${this.connectType === 'LowPass' ? 2 : 1}.png`
+      return `static/LTPi/T${this.connectType === 'LowPass' ? 2 : 1}.png`
     }
   }
 }
