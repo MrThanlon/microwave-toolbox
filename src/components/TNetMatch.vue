@@ -12,7 +12,7 @@
         <option value="HighPass">高通</option>
       </select>
     </div>
-    <img :src="imgPath" width="200" height="200">
+    <img :src="imgPath" width="200">
     <div v-if="connectType==='LowPass'">
       <div class="input-group mb-2">
         <span class="input-group-text">L1</span>
@@ -79,7 +79,7 @@ export default {
       return matches.TNet(this.Rs, this.Xs, this.Rl, this.Xl, this.frequency, this.targetQ)[this.connectType]
     },
     imgPath () {
-      return `/static/LTPi/T${this.connectType === 'LowPass' ? 2 : 1}.jpg`
+      return `/static/LTPi/T${this.connectType === 'LowPass' ? 2 : 1}.png`
     }
   }
 }

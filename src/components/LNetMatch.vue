@@ -11,7 +11,7 @@
           <option value="CLHP">C-L高通</option>
         </select>
       </div>
-      <img :src="imgPath" width="200" height="200">
+      <img :src="imgPath" width="200">
       <div class="input-group mb-2" v-if="answer!==null">
         <span class="input-group-text">L</span>
         <input class="form-control" disabled :value="answer.L.toFixed(3)">
@@ -58,7 +58,7 @@ export default {
     },
     imgPath () {
       const imgMap = { LCLP: 3, LCHP: 1, CLLP: 2, CLHP: 4 }
-      return `/static/LTPi/L${imgMap[this.connectType]}.jpg`
+      return `/static/LTPi/L${imgMap[this.connectType]}.png`
     }
   }
 }
