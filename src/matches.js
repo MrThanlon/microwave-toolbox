@@ -1,4 +1,4 @@
-const complex = require('complex.js')
+import complex from 'complex.js'
 
 export default {
   LCLP (Rs, Xs, Rl, Xl, f) {
@@ -18,10 +18,14 @@ export default {
       const C = (Cp - C1) * 1e12
       const Ls = Q * Rl / omega
       const L = (Ls - L1) * 1e9
-      return {
-        L,
-        C,
-        Q
+      if (isFinite(L) && isFinite(C) && isFinite(Q) && L > 0 && C > 0) {
+        return {
+          L,
+          C,
+          Q: Math.abs(Q)
+        }
+      } else {
+        return null
       }
     }
   },
@@ -58,10 +62,14 @@ export default {
           L = Lp * L1 / (L1 - Lp) * 1e9
         }
       }
-      return {
-        L,
-        C,
-        Q: Math.abs(Q)
+      if (isFinite(L) && isFinite(C) && isFinite(Q) && L > 0 && C > 0) {
+        return {
+          L,
+          C,
+          Q: Math.abs(Q)
+        }
+      } else {
+        return null
       }
     }
   },
@@ -211,7 +219,7 @@ export default {
     }
   },
   singleStubParallel (Rs, Xs, Rl, Xl) {
-    if (Xs !== 0 || Xl !== 0) {
+    if (Xs !== 0) {
       return null
     }
     let t1
@@ -243,7 +251,7 @@ export default {
     }
   },
   singleStubSerial (Rs, Xs, Rl, Xl) {
-    if (Xs !== 0 || Xl !== 0) {
+    if (Xs !== 0) {
       return null
     }
     // transmit to admittance

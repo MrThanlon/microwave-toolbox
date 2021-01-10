@@ -27,17 +27,17 @@
       <label>解{{idx+1}}</label>
       <div class="input-group mb-2">
         <span class="input-group-text">第一枝节</span>
-        <input class="form-control" :value="item.l1.toFixed(3)">
+        <input class="form-control" disabled :value="item.l1.toFixed(3)">
         <span class="input-group-text">&lambda;</span>
-        <input class="form-control" :value="(3e11/frequency*item.l1).toFixed(3)">
+        <input class="form-control" disabled :value="(3e11/frequency*item.l1).toFixed(3)">
         <span class="input-group-text">mm</span>
       </div>
 
       <div class="input-group">
         <span class="input-group-text">第二枝节</span>
-        <input class="form-control" :value="item.l2.toFixed(3)">
+        <input class="form-control" disabled :value="item.l2.toFixed(3)">
         <span class="input-group-text">&lambda;</span>
-        <input class="form-control" :value="(3e11/frequency*item.l2).toFixed(3)">
+        <input class="form-control" disabled :value="(3e11/frequency*item.l2).toFixed(3)">
         <span class="input-group-text">mm</span>
       </div>
     </div>
@@ -71,7 +71,7 @@ export default {
   },
   computed: {
     answer () {
-      const answer = matches.doubleStub(this.Rs, this.Xs, this.Rl, this.Xl, this.d1, this.kLambda)
+      const answer = matches.doubleStub(this.Rs, this.Xs, this.Rl, this.Xl, parseFloat(this.d1), this.kLambda)
       return answer !== null ? answer[this.terminationLoad] : null
     }
   }

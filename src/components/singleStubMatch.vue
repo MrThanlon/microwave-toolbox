@@ -1,59 +1,62 @@
 <template>
   <div>
-    <div class="input-group mb-2">
-      <span class="input-group-text">连接方式</span>
-      <select class="form-select" v-model="connectType">
-        <option :value="'parallel'">并联支路</option>
-        <option :value="'serial'">串联支路</option>
-      </select>
-    </div>
-
-    <div class="input-group mb-2">
-      <span class="input-group-text">端接</span>
-      <select class="form-select" v-model="terminationLoad">
-        <option :value="'short'">短路</option>
-        <option :value="'open'">开路</option>
-      </select>
-    </div>
-
-    <div v-if="answer!==null">
-      <label>解1</label>
+    <div v-if="Rs===Rl&&Xs===-Xl">已匹配</div>
+    <div v-else>
       <div class="input-group mb-2">
-        <span class="input-group-text">枝节距离</span>
-        <input class=form-control disabled :value="distance1Lambda.toFixed(3)">
-        <span class="input-group-text">&lambda;</span>
-        <input class="form-control" disabled :value="distance1Millimeter.toFixed(3)">
-        <span class="input-group-text">mm</span>
+        <span class="input-group-text">连接方式</span>
+        <select class="form-select" v-model="connectType">
+          <option :value="'parallel'">并联支路</option>
+          <option :value="'serial'">串联支路</option>
+        </select>
       </div>
 
       <div class="input-group mb-2">
-        <span class="input-group-text">枝节长度</span>
-        <input class=form-control disabled :value="length1Lambda.toFixed(3)">
-        <span class="input-group-text">&lambda;</span>
-        <input class="form-control" disabled :value="length1Millimeter.toFixed(3)">
-        <span class="input-group-text">mm</span>
-      </div>
-    </div>
-
-    <div v-if="answer!==null">
-      <label>解2</label>
-      <div class="input-group mb-2">
-        <span class="input-group-text">枝节距离</span>
-        <input class=form-control disabled :value="distance2Lambda.toFixed(3)">
-        <span class="input-group-text">&lambda;</span>
-        <input class="form-control" disabled :value="distance2Millimeter.toFixed(3)">
-        <span class="input-group-text">mm</span>
+        <span class="input-group-text">端接</span>
+        <select class="form-select" v-model="terminationLoad">
+          <option :value="'short'">短路</option>
+          <option :value="'open'">开路</option>
+        </select>
       </div>
 
-      <div class="input-group mb-2">
-        <span class="input-group-text">枝节长度</span>
-        <input class=form-control disabled :value="length2Lambda.toFixed(3)">
-        <span class="input-group-text">&lambda;</span>
-        <input class="form-control" disabled :value="length2Millimeter.toFixed(3)">
-        <span class="input-group-text">mm</span>
+      <div v-if="answer!==null">
+        <label>解1</label>
+        <div class="input-group mb-2">
+          <span class="input-group-text">枝节距离</span>
+          <input class=form-control disabled :value="distance1Lambda.toFixed(3)">
+          <span class="input-group-text">&lambda;</span>
+          <input class="form-control" disabled :value="distance1Millimeter.toFixed(3)">
+          <span class="input-group-text">mm</span>
+        </div>
+
+        <div class="input-group mb-2">
+          <span class="input-group-text">枝节长度</span>
+          <input class=form-control disabled :value="length1Lambda.toFixed(3)">
+          <span class="input-group-text">&lambda;</span>
+          <input class="form-control" disabled :value="length1Millimeter.toFixed(3)">
+          <span class="input-group-text">mm</span>
+        </div>
       </div>
+
+      <div v-if="answer!==null">
+        <label>解2</label>
+        <div class="input-group mb-2">
+          <span class="input-group-text">枝节距离</span>
+          <input class=form-control disabled :value="distance2Lambda.toFixed(3)">
+          <span class="input-group-text">&lambda;</span>
+          <input class="form-control" disabled :value="distance2Millimeter.toFixed(3)">
+          <span class="input-group-text">mm</span>
+        </div>
+
+        <div class="input-group mb-2">
+          <span class="input-group-text">枝节长度</span>
+          <input class=form-control disabled :value="length2Lambda.toFixed(3)">
+          <span class="input-group-text">&lambda;</span>
+          <input class="form-control" disabled :value="length2Millimeter.toFixed(3)">
+          <span class="input-group-text">mm</span>
+        </div>
+      </div>
+      <div v-else>不适用</div>
     </div>
-    <div v-else>不适用</div>
   </div>
 </template>
 

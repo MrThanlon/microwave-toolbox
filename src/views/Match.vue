@@ -8,7 +8,7 @@
                v-for="item in parameterInput"
                :key="item.text">
             <span class="input-group-text">{{item.text}}</span>
-            <input class="form-control" v-model="parameterValue[item.name]">
+            <input class="form-control" v-model="item.value">
             <span class="input-group-text"
                   v-if="item.unit!==null"
                   v-html="item.unit"></span>
@@ -34,11 +34,11 @@
             <component
               class="w-100"
               :is="matchMethod"
-              :frequency="parseFloat(parameterValue.frequency)"
-              :Rs="parseFloat(parameterValue.Rs)"
-              :Xs="parseFloat(parameterValue.Xs)"
-              :Rl="parseFloat(parameterValue.Rl)"
-              :Xl="parseFloat(parameterValue.Xl)">
+              :frequency="parameterValue.frequency"
+              :Rs="parameterValue.Rs"
+              :Xs="parameterValue.Xs"
+              :Rl="parameterValue.Rl"
+              :Xl="parameterValue.Xl">
             </component>
           </keep-alive>
         </div>
@@ -58,27 +58,32 @@ export default {
         {
           text: '频率',
           name: 'frequency',
-          unit: 'Hz'
+          unit: 'Hz',
+          value: '1e9'
         },
         {
           text: '源电阻',
           name: 'Rs',
-          unit: '&Omega;'
+          unit: '&Omega;',
+          value: 50
         },
         {
           text: '源电抗',
           name: 'Xs',
-          unit: '&Omega;'
+          unit: '&Omega;',
+          value: 0
         },
         {
           text: '负载电阻',
           name: 'Rl',
-          unit: '&Omega;'
+          unit: '&Omega;',
+          value: 50
         },
         {
           text: '负载电抗',
           name: 'Xl',
-          unit: '&Omega;'
+          unit: '&Omega;',
+          value: 0
         }/* ,
         {
           text: '相对介电常数',
@@ -91,15 +96,6 @@ export default {
           unit: null
         } */
       ],
-      parameterValue: {
-        frequency: '1e9',
-        Rs: 50,
-        Xs: 0,
-        Rl: 50,
-        Xl: 0,
-        epsilon: 1,
-        mu: 1
-      },
       matchMethods: [
         {
           text: 'L型网络匹配',
@@ -130,13 +126,15 @@ export default {
           component: () => import('@/components/quarterLambdaMatch')
         }
       ],
-      matchMethod: LNetMatch,
-      TNetAnswer: null,
-      PiNetAnswer: null,
-      singleStubParallelAnswer: null,
-      singleStubSerialAnswer: null,
-      doubleStubAnswer: null,
-      tripleStubAnswer: null
+      matchMethod: LNetMatch
+    }
+  },
+  computed: {
+    parameterValue () {
+      return this.parameterInput.reduce((pre, cur) => {
+        pre[cur.name] = parseFloat(cur.value)
+        return pre
+      }, {})
     }
   },
   mounted () {

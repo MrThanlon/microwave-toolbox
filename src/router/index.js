@@ -19,6 +19,10 @@ const routes = [
     component: Match
   },
   {
+    path: '/smith',
+    component: () => import('../views/SmithChart')
+  },
+  {
     path: '/test',
     component: Test
   },

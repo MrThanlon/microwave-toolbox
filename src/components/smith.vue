@@ -1,6 +1,6 @@
 <template>
   <svg :width="length" :height="length" ref="svg" id="svg"
-       @click="clickCallback"
+       @mousedown="clickCallback"
        @mousemove="moveCallback"
        @mouseleave="leaveCallback">
   </svg>
@@ -48,7 +48,9 @@ export default {
       cursorResistanceRealCircle: null,
       cursorResistanceImageCircle: null,
       cursorAdmittanceRealCircle: null,
-      cursorAdmittanceImageCircle: null
+      cursorAdmittanceImageCircle: null,
+      cursorX: 0,
+      cursorY: 0
     }
   },
   computed: {
@@ -126,13 +128,12 @@ export default {
       }
     },
     clickCallback (e) {
-      if (e.target !== this.$refs.svg) {
-        return
-      }
-      const x = e.offsetX / this.lengthUnit - 1
-      const y = 1 - e.offsetY / this.lengthUnit
+      const x = this.cursorX
+      const y = this.cursorY
+      if (x * x + y * y > 1) { return }
       const rl = (1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y)
       const xl = 2 * y / ((1 - x) * (1 - x) + y * y)
+      this.$emit('v-click', { r: rl, x: xl })
       this.drawRealCircle(rl)
       this.drawImageCircle(xl)
     },
@@ -185,29 +186,33 @@ export default {
       }
       const x = e.offsetX / this.lengthUnit - 1
       const y = 1 - e.offsetY / this.lengthUnit
+      this.cursorX = x
+      this.cursorY = y
       // const rl = (1 - x * x - y * y) / ((1 - x) * (1 - x) + y * y)
       // const xl = 2 * y / ((1 - x) * (1 - x) + y * y)
       // this.drawRealCircle(rl)
       // this.drawImageCircle(xl)
+      let Z = null
+      let G = null
       if (this.enableResistanceCursor) {
         // draw cursor
-        const Z = this.xyToZ(x, y)
+        Z = this.xyToZ(x, y)
         if (isFinite(Z[0]) && isFinite(Z[1]) && Z[0] > 0) {
           this.drawResistanceCursorRealCircle(Z[0])
           this.drawResistanceCursorImageCircle(Z[1])
         }
       }
       if (this.enableAdmittanceCursor) {
-        const G = this.xyToG(x, y)
+        G = this.xyToG(x, y)
         if (isFinite(G[0] && isFinite(G[1]) && G[0] > 0)) {
           this.drawAdmittanceCursorRealCircle(G[0])
           this.drawAdmittanceCursorImageCircle(G[1])
         }
       }
-      this.$emit('v-mousemove', { x, y })
+      this.$emit('v-mousemove', { Z, G })
     },
     leaveCallback (e) {
-      this.$emit('v-mousemove', { x: null, y: null })
+      this.$emit('v-mousemove', { Z: null, G: null })
       if (this.cursorResistanceRealCircle !== null) {
         this.cursorResistanceRealCircle.style.display = 'none'
       }
