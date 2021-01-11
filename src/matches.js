@@ -451,5 +451,6 @@ export default {
       Z1: Math.sqrt(Zin * Zs),
       d: distance
     }
-  }
+  },
+  chebyshev (Rs, Xs, Rl, Xl, gammaM, N) {}
 }
