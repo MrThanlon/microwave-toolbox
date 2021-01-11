@@ -10,7 +10,7 @@
 
     <div class="input-group" v-if="answer!==null">
       <span class="input-group-text">1/4波长线特性阻抗</span>
-      <input class="form-control" disabled :value="answer.Z1.toFixed(3)">
+      <input class="form-control" disabled :value="renderComplex(answer.Z1)">
       <span class="input-group-text">&Omega;</span>
     </div>
 
@@ -35,6 +35,11 @@ export default {
   computed: {
     answer () {
       return matches.quarterLambda(this.Rs, this.Xs, this.Rl, this.Xl)
+    }
+  },
+  methods: {
+    renderComplex (c) {
+      return `${c.re.toFixed(3)}` + (c.im !== 0 ? `${c.im > 0 ? '+' : ''}${c.im.toFixed(3)}j` : '')
     }
   }
 }

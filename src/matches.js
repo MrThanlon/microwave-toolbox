@@ -446,9 +446,10 @@ export default {
     } else {
       return null
     }
-    const Zin = Zs * (1 + gammaIn) / (1 - gammaIn)
+    const Zin = Zs.mul((1 + gammaIn) / (1 - gammaIn))
+    const Z1 = Zin.mul(Zs).sqrt()
     return {
-      Z1: Math.sqrt(Zin * Zs),
+      Z1,
       d: distance
     }
   },
