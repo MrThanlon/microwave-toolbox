@@ -111,6 +111,7 @@ export default {
     drawRealCircle (rl) {
       if (this.realCircle === null) {
         this.realCircle = this.createRealCircle(rl, 'red')
+        this.realCircle.style.strokeWidth = 4
         this.$refs.svg.appendChild(this.realCircle)
       } else {
         const radius = 1 / (1 + rl)
@@ -121,6 +122,7 @@ export default {
     drawImageCircle (xl) {
       if (this.imageCircle === null) {
         this.imageCircle = this.createImageCircle(xl, 'red')
+        this.imageCircle.style.strokeWidth = 4
         this.$refs.svg.appendChild(this.imageCircle)
       } else {
         // modify
