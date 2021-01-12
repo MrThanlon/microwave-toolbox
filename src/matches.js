@@ -453,5 +453,46 @@ export default {
       d: distance
     }
   },
-  chebyshev (Rs, Xs, Rl, Xl, gammaM, N) {}
+  asec (x) {
+    return Math.acos(1 / x)
+  },
+  chebyshev (Rs, Xs, Rl, Xl, gammaM, N = 1) {
+    if (N > 4) {
+      return null
+    }
+    const Zl = complex(Rl, Xl)
+    const Zs = complex(Rs, Xs)
+    const thetaM = this.asec(Math.cosh(1 / N * (Math.acosh(Zl.div(Zs).log().div(2 * gammaM).abs()))))
+    const fM = 2 - 4 * thetaM / Math.PI
+    const gamma = Array(N)
+    const Z = Array(N)
+    if (N === 1) {
+      gamma[0] = gammaM * 1 / Math.cos(gammaM) / 2
+      Z[0] = Zs.log().add(2 * gamma[0]).exp()
+    } else if (N === 2) {
+      gamma[0] = gammaM * 1 / Math.cos(thetaM) ** 2 / 2
+      gamma[1] = gammaM * (1 / Math.cos(thetaM) ** 2 - 1)
+      Z[0] = Zs.log().add(2 * gamma[0]).exp()
+      Z[1] = Z[0].log().add(2 * gamma[1]).exp()
+    } else if (N === 3) {
+      gamma[0] = gammaM * 1 / Math.cos(thetaM) ** 3 / 2
+      gamma[1] = gammaM * 3 * (1 / Math.cos(thetaM) ** 3 - 1 / Math.cos(thetaM)) / 2
+      gamma[2] = gamma[1]
+      Z[0] = Zs.log().add(2 * gamma[0]).exp()
+      Z[1] = Z[0].log().add(2 * gamma[1]).exp()
+      Z[2] = Z[1].log().add(2 * gamma[2]).exp()
+    } else if (N === 4) {
+      gamma[0] = gammaM * 1 / Math.cos(thetaM) ** 4 / 2
+      gamma[1] = gammaM * 2 * (1 / Math.cos(thetaM) ** 4 - 1 / Math.cos(thetaM) ** 2)
+      gamma[2] = gammaM * (3 / Math.cos(thetaM) ** 4 - 4 / Math.cos(thetaM) ** 2 + 1)
+      gamma[3] = gamma[1]
+      Z[0] = Zs.log().add(2 * gamma[0]).exp()
+      Z[1] = Z[0].log().add(2 * gamma[1]).exp()
+      Z[2] = Z[1].log().add(2 * gamma[2]).exp()
+      Z[3] = Z[2].log().add(2 * gamma[3]).exp()
+    } else {
+      return null
+    }
+    return { thetaM, fM, Z }
+  }
 }

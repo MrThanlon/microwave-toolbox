@@ -124,6 +124,10 @@ export default {
         {
           text: '四分之一波长变换器',
           component: () => import('@/components/quarterLambdaMatch')
+        },
+        {
+          text: '切比雪夫',
+          component: () => import('@/components/chebyshevMatch')
         }
       ],
       matchMethod: LNetMatch
