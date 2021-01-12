@@ -467,7 +467,7 @@ export default {
     const gamma = Array(N)
     const Z = Array(N)
     if (N === 1) {
-      gamma[0] = gammaM * 1 / Math.cos(gammaM) / 2
+      gamma[0] = gammaM * 1 / Math.cos(thetaM) / 2
       Z[0] = Zs.log().add(2 * gamma[0]).exp()
     } else if (N === 2) {
       gamma[0] = gammaM * 1 / Math.cos(thetaM) ** 2 / 2
