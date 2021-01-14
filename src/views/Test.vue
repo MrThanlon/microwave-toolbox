@@ -1,22 +1,18 @@
 <template>
   <div>
-    <span ref="math"></span>
   </div>
 </template>
 
 <script>
-import katex from 'katex'
+import complex from 'complex.js'
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import worker from 'workerize-loader!../test'
 export default {
   name: 'Test',
-  data () {
-    return {
-      renderString: ''
-    }
-  },
   mounted () {
-    katex.render('c = \\pm\\sqrt{a^2 + b^2}', this.$refs.math, {
-      throwOnError: false
-    })
+    console.debug(complex.toString())
+    const instance = worker()
+    instance.forever()
   }
 }
 </script>

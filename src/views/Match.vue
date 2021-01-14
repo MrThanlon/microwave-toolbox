@@ -128,6 +128,10 @@ export default {
         {
           text: '切比雪夫',
           component: () => import('@/components/chebyshevMatch')
+        },
+        {
+          text: '多节变换器',
+          component: () => import('@/components/binomialMatch')
         }
       ],
       matchMethod: LNetMatch
